@@ -1,0 +1,15 @@
+.products {
+    display:flex;
+    flex-wrap: wrap;
+}
+
+.add-cart {
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    line-height: 3em;
+}
+
+.carts img {
+    width: 80px;
+}
