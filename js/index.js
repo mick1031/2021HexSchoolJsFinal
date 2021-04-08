@@ -38,7 +38,7 @@ function getProducts() {
                 html += templateProduct(item);
             })
 
-            document.querySelector(".products").innerHTML = html;
+            document.querySelector(".productWrap").innerHTML = html;
 
             document.querySelectorAll(".add-cart").forEach(function (item) {
                 item.addEventListener("click", addProductToCart)
@@ -48,15 +48,14 @@ function getProducts() {
 
 function templateProduct(item) {
     return `
-        <div>
+        <li class="productCard">
+            <h4 class="productType">新品</h4>
             <img src="${item.images}" alt="">
-            <div class="add-cart" data-id="${item.id}">加入購物車</div>
-            <div>
-                <div>${item.title}</div>
-                <div>${item.origin_price}</div>
-                <div>${item.price}</div>
-            </div>
-        </div>
+            <a href="#" class="add-cart" data-id="${item.id}">加入購物車</a>
+            <h3>${item.title}</h3>
+            <del class="originPrice">NT$${item.origin_price}</del>
+            <p class="nowPrice">NT$${item.price}</p>
+        </li>
     `
 }
 
@@ -65,12 +64,15 @@ function getCarts() {
         .then(function (response) {
             let list = response.data.carts;
             let html = "";
+            let total = 0;
             list.forEach(function (item) {
+                total += parseInt(item.product.price * item.quantity);
                 html += templateCarts(item);
             })
 
-            document.querySelector(".carts-table tbody").innerHTML = html;
+            document.querySelector(".shoppingCart-table tbody").innerHTML = html;
 
+            document.querySelector(".shoppingCart-table tfoot").innerHTML = lastCartTr(total);
 
             document.querySelectorAll(".del-carts").forEach(function (item) {
                 item.addEventListener("click", delCart)
@@ -82,15 +84,35 @@ function templateCarts(item) {
     return `
         <tr>
             <td>
-                <img src="${item.product.images}">
-                ${item.product.title}
+                <div class="cardItem-title">
+                    <img src="${item.product.images}" alt="">
+                    <p>${item.product.title}</p>
+                </div>
             </td>
-            <td>${item.product.price}</td>
+            <td>NT${item.product.price}</td>
             <td>${item.quantity}</td>
-            <td>${item.product.price * item.quantity}</td>
-            <td> 
-                <button class="del-carts" data-id="${item.id}">del</button> 
+            <td>NT$${item.product.price * item.quantity}</td>
+            <td class="discardBtn">
+                <a href="#" class="material-icons del-carts" data-id="${item.id}">
+                    clear
+                </a>
             </td>
+        </tr>
+    `
+}
+
+function lastCartTr(total) {
+    return `
+        <tr>
+            <td>
+                <a href="#" class="discardAllBtn">刪除所有品項</a>
+            </td>
+            <td></td>
+            <td></td>
+            <td>
+                <p>總金額</p>
+            </td>
+            <td>NT$${total}</td>
         </tr>
     `
 }
@@ -98,7 +120,7 @@ function templateCarts(item) {
 getProducts();
 getCarts();
 
-document.querySelector(".del-all-carts").addEventListener("click", function () {
+document.querySelector(".discardAllBtn").addEventListener("click", function () {
     axios.delete("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts")
     .then(function(response) {
         getCarts();
