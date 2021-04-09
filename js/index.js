@@ -1,12 +1,6 @@
 
-let header = {
-    headers: {
-        'Authorization': 'a1tPq1tvk2cOZoiEofFfvE6TC4D2'
-    }
-}
-
-function addProductToCart() {
-
+function addProductToCart(event) {
+    event.preventDefault();
     let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts";
     let data = {
         data: {
@@ -20,7 +14,9 @@ function addProductToCart() {
         })
 }
 
-function delCart() {
+function delCart(event) {
+    event.preventDefault();
+
     let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts/" + this.getAttribute("data-id");
 
     axios.delete(url)
@@ -30,6 +26,7 @@ function delCart() {
 }
 
 function getProducts() {
+    
     axios.get("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/products")
         .then(function (response) {
             let list = response.data.products;
