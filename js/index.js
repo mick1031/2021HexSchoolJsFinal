@@ -1,47 +1,83 @@
+let carts = [];
 
 function addProductToCart(event) {
-    event.preventDefault();
-    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts";
-    let data = {
-        data: {
-            "productId": this.getAttribute("data-id"),
-            "quantity": 1
+    const id = event.target.getAttribute("data-id");
+    let cartId = "";
+    let quantity = 1;
+
+    carts.forEach(function (item) {
+        if (item.product.id == id) {
+            cartId = item.id;
+            quantity = item.quantity;
         }
-    };
-    axios.post(url, data)
-        .then(function (response) {
-            getCarts();
-        })
+    })
+
+    if (cartId == "") {
+        const url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts";
+        const data = {
+            data: {
+                "productId": id,
+                "quantity": 1
+            }
+        };
+        axios.post(url, data)
+            .then(function (response) {
+                renderCarts();
+            })
+    } else {
+        const url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts";
+        const data = {
+            data: {
+                "id": cartId,
+                "quantity": quantity + 1
+            }
+        };
+        axios.patch(url, data)
+            .then(function (response) {
+                renderCarts();
+            })
+    }
+
 }
 
 function delCart(event) {
     event.preventDefault();
 
-    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts/" + this.getAttribute("data-id");
+    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts/" + event.target.getAttribute("data-id");
 
     axios.delete(url)
         .then(function (response) {
-            getCarts();
+            renderCarts();
         })
 }
 
-function getProducts() {
-    
+function renderProducts() {
+
     axios.get("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/products")
         .then(function (response) {
-            let list = response.data.products;
+            const products = response.data.products;
+            const category = document.querySelector(".productSelect").value;
+            let list =  [];
+
+            if(category != "全部"){
+                products.forEach(function(item) {
+                    if(category == item.category){
+                        list.push(item);
+                    }
+                })
+            } else {
+                list = products;
+            }
+
             let html = "";
             list.forEach(function (item) {
                 html += templateProduct(item);
             })
 
             document.querySelector(".productWrap").innerHTML = html;
-
-            document.querySelectorAll(".add-cart").forEach(function (item) {
-                item.addEventListener("click", addProductToCart)
-            })
         })
 }
+
 
 function templateProduct(item) {
     return `
@@ -56,24 +92,21 @@ function templateProduct(item) {
     `
 }
 
-function getCarts() {
+function renderCarts() {
     axios.get("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts")
         .then(function (response) {
-            let list = response.data.carts;
+            carts = response.data.carts;
+            const cartsData = response.data;
             let html = "";
             let total = 0;
-            list.forEach(function (item) {
+            carts.forEach(function (item) {
                 total += parseInt(item.product.price * item.quantity);
                 html += templateCarts(item);
             })
 
             document.querySelector(".shoppingCart-table tbody").innerHTML = html;
 
-            document.querySelector(".shoppingCart-table tfoot").innerHTML = lastCartTr(total);
-
-            document.querySelectorAll(".del-carts").forEach(function (item) {
-                item.addEventListener("click", delCart)
-            })
+            document.querySelector(".shoppingCart-table tfoot").innerHTML = lastCartTr(cartsData);
 
             setEventDiscardAllBtn();
         })
@@ -100,7 +133,7 @@ function templateCarts(item) {
     `
 }
 
-function lastCartTr(total) {
+function lastCartTr(cartsData) {
     return `
         <tr>
             <td>
@@ -111,7 +144,7 @@ function lastCartTr(total) {
             <td>
                 <p>總金額</p>
             </td>
-            <td>NT$${total}</td>
+            <td>NT$${cartsData.finalTotal}</td>
         </tr>
     `
 }
@@ -120,39 +153,66 @@ function setEventDiscardAllBtn() {
     document.querySelector(".discardAllBtn").addEventListener("click", function () {
         axios.delete("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts")
             .then(function (response) {
-                getCarts();
+                renderCarts();
             });
     })
 }
 
-getProducts();
-getCarts();
+function init() {
+    renderProducts();
+    renderCarts();
 
+    document.querySelector(".orderInfo-btn").addEventListener("click", function () {
 
-document.querySelector(".orderInfo-btn").addEventListener("click", function () {
+        let name = document.getElementById("customerName").value;
+        let tel = document.getElementById("customerPhone").value;
+        let email = document.getElementById("customerEmail").value;
+        let address = document.getElementById("customerAddress").value;
+        let payment = document.getElementById("tradeWay").value;
 
-    let name = document.getElementById("customerName").value;
-    let tel = document.getElementById("customerPhone").value;
-    let email = document.getElementById("customerEmail").value;
-    let address = document.getElementById("customerAddress").value;
-    let payment = document.getElementById("tradeWay").value;
+        let user = {
+            name,
+            tel,
+            email,
+            address,
+            payment
+        };
 
-    let user = {
-        name,
-        tel,
-        email,
-        address,
-        payment
-    };
+        // save order
+        let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/orders";
+        let data = {
+            data: { user }
+        };
+        axios.post(url, data)
+            .then(function (response) {
+                document.getElementById("customerName").value = "";
+                document.getElementById("customerPhone").value = "";
+                document.getElementById("customerEmail").value = "";
+                document.getElementById("customerAddress").value = "";
+                document.getElementById("tradeWay").value = "ATM";
+                renderCarts();
+            });
 
-    // save order
-    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/orders";
-    let data = {
-        data: { user }
-    };
-    axios.post(url, data)
-        .then(function (response) {
-            getCarts();
-        });
+    })
 
-})
+    document.querySelector(".shoppingCart-table").addEventListener("click", function (event) {
+        event.preventDefault();
+
+        if (event.target.classList.contains("del-carts")) {
+            delCart(event);
+        }
+
+    })
+
+    document.querySelector(".productWrap").addEventListener("click", function (event) {
+        event.preventDefault();
+        if (event.target.classList.contains("add-cart")) {
+            addProductToCart(event);
+        }
+    })
+
+    document.querySelector(".productSelect").addEventListener("change", renderProducts);
+
+}
+
+init();
