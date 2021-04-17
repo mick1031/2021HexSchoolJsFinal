@@ -38,12 +38,60 @@ let chart = c3.generate({
     },
 });
 
-let data = [];
-
-let header = {
+let orders = [];
+const header = {
     headers: {
         'Authorization': 'a1tPq1tvk2cOZoiEofFfvE6TC4D2'
     }
 }
-let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
-axios.get(url, header).then(response => { data = response.data.orders });
+
+function init() {
+    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
+    axios.get(url, header).then(response => {
+        orders = response.data.orders
+        renderOrders();
+
+    });
+}
+
+function renderOrders() {
+    let html = "";
+    orders.forEach(function(item) {
+        html += templateOrders(item);
+    })
+    document.querySelector(".orderPage-table tbody").innerHTML = html;
+}
+
+function templateOrders(item) {
+    let productStr = "";
+    item.products.forEach(function(product) {
+        productStr += `<p>${product.title}</p>`;
+    })
+
+    let statusStr = "";
+    let createDateStr = "";
+    
+    return `
+        <tr>
+            <td>${item.id}</td>
+            <td>
+                <p>${item.user.name}</p>
+                <p>${item.user.tel}</p>
+            </td>
+            <td>${item.user.address}</td>
+            <td>${item.user.email}</td>
+            <td>
+                ${productStr}
+            </td>
+            <td>2021/03/08</td>
+            <td class="orderStatus">
+                <a href="#">未處理</a>
+            </td>
+            <td>
+                <input type="button" class="delSingleOrder-Btn" value="刪除">
+            </td>
+        </tr>
+`;
+}
+
+init()
