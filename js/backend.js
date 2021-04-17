@@ -39,7 +39,10 @@ let chart = c3.generate({
 });
 
 let orders = [];
-const header = {
+let data = [];
+let products = [];
+
+let header = {
     headers: {
         'Authorization': 'a1tPq1tvk2cOZoiEofFfvE6TC4D2'
     }
@@ -56,7 +59,7 @@ function init() {
 
 function renderOrders() {
     let html = "";
-    orders.forEach(function(item) {
+    orders.forEach(function (item) {
         html += templateOrders(item);
     })
     document.querySelector(".orderPage-table tbody").innerHTML = html;
@@ -64,13 +67,13 @@ function renderOrders() {
 
 function templateOrders(item) {
     let productStr = "";
-    item.products.forEach(function(product) {
+    item.products.forEach(function (product) {
         productStr += `<p>${product.title}</p>`;
     })
 
     let statusStr = "";
     let createDateStr = "";
-    
+
     return `
         <tr>
             <td>${item.id}</td>
@@ -95,3 +98,14 @@ function templateOrders(item) {
 }
 
 init()
+
+let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
+axios.get(url, header).then(response => {
+    data = response.data.orders
+
+    data.forEach(function (item) {
+        products = [...products, ...item.products]
+    })
+
+    console.log(products)
+});
