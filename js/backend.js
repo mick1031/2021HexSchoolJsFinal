@@ -39,6 +39,7 @@ let chart = c3.generate({
 });
 
 let data = [];
+let products = [];
 
 let header = {
     headers: {
@@ -46,4 +47,12 @@ let header = {
     }
 }
 let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
-axios.get(url, header).then(response => { data = response.data.orders });
+axios.get(url, header).then(response => {
+    data = response.data.orders
+
+    data.forEach(function (item) {
+        products = [...products, ...item.products]
+    })
+    
+    console.log(products)
+});
