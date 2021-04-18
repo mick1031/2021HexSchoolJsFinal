@@ -148,9 +148,8 @@ function renderPieChart() {
         if (category[item.category] == undefined) {
             category[item.category] = 0;
         }
-        category[item.category] += item.quantity;
+        category[item.category] += item.quantity * item.price;
     })
-
 
     let keys = Object.keys(category);
     let drawData = [];
@@ -158,9 +157,6 @@ function renderPieChart() {
     keys.forEach(function (item) {
         drawData.push([item, category[item]]);
     })
-
-
-    document.querySelector("#chart").innerHTML = "";
 
     c3.generate({
         bindto: '#chart', // HTML 元素綁定
