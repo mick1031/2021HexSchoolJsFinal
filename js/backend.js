@@ -15,31 +15,12 @@ function menuToggle() {
         menu.classList.add('openMenu');
     }
 }
+
 function closeMenu() {
     menu.classList.remove('openMenu');
 }
 
-let chart = c3.generate({
-    bindto: '#chart', // HTML 元素綁定
-    data: {
-        type: "pie",
-        columns: [
-            ['Louvre 雙人床架', 1],
-            ['Antony 雙人床架', 2],
-            ['Anty 雙人床架', 3],
-            ['其他', 4],
-        ],
-        colors: {
-            "Louvre 雙人床架": "#DACBFF",
-            "Antony 雙人床架": "#9D7FEA",
-            "Anty 雙人床架": "#5434A7",
-            "其他": "#301E5F",
-        }
-    },
-});
-
 let orders = [];
-let data = [];
 let products = [];
 
 let header = {
@@ -49,11 +30,65 @@ let header = {
 }
 
 function init() {
+
+    renderView();
+
+    document.querySelector(".discardAllBtn").addEventListener("click", function (event) {
+        let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
+
+        axios.delete(url, header).then(response => {
+            renderView();
+        });
+    })
+
+    document.querySelector(".orderPage-table tbody").addEventListener("click", function (event) {
+        event.preventDefault();
+
+        let style = event.target.getAttribute("class");
+
+        if (style == "js-changeStatus") {
+            changeStatus(event.target);
+        }
+
+        if (style == "delSingleOrder-Btn") {
+            delSingleOrder(event.target);
+        }
+
+    })
+
+}
+
+function changeStatus(target) {
+    let status = !(target.getAttribute("data-status") == "true");
+    let id = target.getAttribute("data-id");
+    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
+    let obj = {
+        data: {
+            "id": id,
+            "paid": status
+        }
+    };
+    axios.put(url, obj, header).then(response => {
+        renderView();
+    });
+}
+
+function delSingleOrder(target) {
+    let id = target.getAttribute("data-id");
+    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders/" + id;
+    axios.delete(url, header).then(response => {
+        renderView();
+    });
+}
+
+function renderView() {
     let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
     axios.get(url, header).then(response => {
         orders = response.data.orders
-        renderOrders();
+        setProducts();
 
+        renderOrders();
+        renderPieChart();
     });
 }
 
@@ -71,8 +106,10 @@ function templateOrders(item) {
         productStr += `<p>${product.title}</p>`;
     })
 
-    let statusStr = "";
-    let createDateStr = "";
+    let statusStr = '未處裡';
+    if (item.paid) {
+        statusStr = '已處裡';
+    }
 
     return `
         <tr>
@@ -88,24 +125,51 @@ function templateOrders(item) {
             </td>
             <td>2021/03/08</td>
             <td class="orderStatus">
-                <a href="#">未處理</a>
+                <a href="#" class="js-changeStatus" data-id="${item.id}" data-status="${item.paid}" >${statusStr}</a>
             </td>
             <td>
-                <input type="button" class="delSingleOrder-Btn" value="刪除">
+                <input type="button" class="delSingleOrder-Btn" data-id="${item.id}" value="刪除">
             </td>
         </tr>
 `;
 }
 
-init()
+function setProducts() {
+    products = [];
+    orders.forEach(function (item) {
+        products = products.concat(item.products);
+    })
+}
 
-let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
-axios.get(url, header).then(response => {
-    data = response.data.orders
+function renderPieChart() {
 
-    data.forEach(function (item) {
-        products = [...products, ...item.products]
+    let category = {};
+    products.forEach(function (item) {
+        if (category[item.category] == undefined) {
+            category[item.category] = 0;
+        }
+        category[item.category] += item.quantity;
     })
 
-    console.log(products)
-});
+
+    let keys = Object.keys(category);
+    let drawData = [];
+
+    keys.forEach(function (item) {
+        drawData.push([item, category[item]]);
+    })
+
+
+    document.querySelector("#chart").innerHTML = "";
+
+    c3.generate({
+        bindto: '#chart', // HTML 元素綁定
+        data: {
+            type: "pie",
+            columns: drawData
+        },
+    });
+
+}
+
+init()
