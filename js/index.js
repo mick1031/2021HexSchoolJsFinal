@@ -13,7 +13,7 @@ function addProductToCart(event) {
     })
 
     if (cartId == "") {
-        const url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts";
+        const url = "http://livejs-api.hexschool.io/api/livejs/v1/customer/mick1031/carts";
         const data = {
             data: {
                 "productId": id,
@@ -25,7 +25,7 @@ function addProductToCart(event) {
                 renderCarts();
             })
     } else {
-        const url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts";
+        const url = "http://livejs-api.hexschool.io/api/livejs/v1/customer/mick1031/carts";
         const data = {
             data: {
                 "id": cartId,
@@ -43,7 +43,7 @@ function addProductToCart(event) {
 function delCart(event) {
     event.preventDefault();
 
-    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts/" + event.target.getAttribute("data-id");
+    let url = "http://livejs-api.hexschool.io/api/livejs/v1/customer/mick1031/carts/" + event.target.getAttribute("data-id");
 
     axios.delete(url)
         .then(function (response) {
@@ -53,7 +53,7 @@ function delCart(event) {
 
 function renderProducts() {
 
-    axios.get("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/products")
+    axios.get("http://livejs-api.hexschool.io/api/livejs/v1/customer/mick1031/products")
         .then(function (response) {
             const products = response.data.products;
             const category = document.querySelector(".productSelect").value;
@@ -93,7 +93,7 @@ function templateProduct(item) {
 }
 
 function renderCarts() {
-    axios.get("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts")
+    axios.get("http://livejs-api.hexschool.io/api/livejs/v1/customer/mick1031/carts")
         .then(function (response) {
             carts = response.data.carts;
             const cartsData = response.data;
@@ -151,7 +151,7 @@ function lastCartTr(cartsData) {
 
 function setEventDiscardAllBtn() {
     document.querySelector(".discardAllBtn").addEventListener("click", function () {
-        axios.delete("https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/carts")
+        axios.delete("http://livejs-api.hexschool.io/api/livejs/v1/customer/mick1031/carts")
             .then(function (response) {
                 renderCarts();
             });
@@ -179,7 +179,7 @@ function init() {
         };
 
         // save order
-        let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/customer/mick1031/orders";
+        let url = "http://livejs-api.hexschool.io/api/livejs/v1/customer/mick1031/orders";
         let data = {
             data: { user }
         };

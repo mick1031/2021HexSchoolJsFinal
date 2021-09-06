@@ -34,7 +34,7 @@ function init() {
     renderView();
 
     document.querySelector(".discardAllBtn").addEventListener("click", function (event) {
-        let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
+        let url = "http://livejs-api.hexschool.io/api/livejs/v1/admin/mick1031/orders";
 
         axios.delete(url, header).then(response => {
             renderView();
@@ -61,7 +61,7 @@ function init() {
 function changeStatus(target) {
     let status = !(target.getAttribute("data-status") == "true");
     let id = target.getAttribute("data-id");
-    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
+    let url = "http://livejs-api.hexschool.io/api/livejs/v1/admin/mick1031/orders";
     let obj = {
         data: {
             "id": id,
@@ -75,14 +75,14 @@ function changeStatus(target) {
 
 function delSingleOrder(target) {
     let id = target.getAttribute("data-id");
-    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders/" + id;
+    let url = "http://livejs-api.hexschool.io/api/livejs/v1/admin/mick1031/orders/" + id;
     axios.delete(url, header).then(response => {
         renderView();
     });
 }
 
 function renderView() {
-    let url = "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/mick1031/orders";
+    let url = "http://livejs-api.hexschool.io/api/livejs/v1/admin/mick1031/orders";
     axios.get(url, header).then(response => {
         orders = response.data.orders
         setProducts();
